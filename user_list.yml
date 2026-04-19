@@ -1,0 +1,9 @@
+users:
+  - name: alice
+    uid: 1501
+  - name: bob
+    uid: 1502
+  - name: carol
+    uid: 2501
+  - name: dave
+    uid: 2502

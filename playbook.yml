@@ -1,0 +1,45 @@
+---
+- name: Ensure devops group exists on all servers
+  hosts: all
+  become: true
+  tasks:
+    - name: Ensure devops group
+      ansible.builtin.group:
+        name: devops
+        state: present
+
+- name: Ensure users exist on webservers
+  hosts: webservers
+  vars:
+    user_password: redhat
+  vars_files: user_list.yml
+  become: true
+  tasks:
+    - name: Ensure user exists on the webservers group
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        uid: "{{ item.uid }}"
+        groups: wheel,devops
+        append: true
+        shell: /bin/bash
+        password: "{{ user_password | password_hash('sha512', 'theSecretSalt') }}"
+      loop: "{{ users }}"
+      when: (item.uid | string)[0] == '1'
+
+- name: Ensure users exist on the database group
+  hosts: database
+  vars:
+    user_password: redhat
+  vars_files: user_list.yml
+  become: true
+  tasks:
+    - name: Ensure user exists on the database group
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        uid: "{{ item.uid }}"
+        groups: wheel,devops
+        append: true
+        shell: /bin/bash
+        password: "{{ user_password | password_hash('sha512', 'aSecretSalt') }}"
+      loop: "{{ users }}"
+      when: (item.uid | string)[0] == '2'
